@@ -79,22 +79,22 @@ func (r *RedisRepo) DeleteByID(ctx context.Context, id uint64) error {
 		return ErrNotExist
 	} else if err != nil {
 		txn.Discard()
-		return fmt.Errorf("failed to delete order: %w", err)
+		return fmt.Errorf("get order: %w", err)
 	}
 
-	if err = txn.SRem(ctx, "orders", key).Err(); err != nil {
+	if err := txn.SRem(ctx, "orders", key).Err(); err != nil {
 		txn.Discard()
-		return fmt.Errorf("failed to remove order from set: %w", err)
+		return fmt.Errorf("failed to remove from orders set: %w", err)
 	}
 
 	if _, err := txn.Exec(ctx); err != nil {
-		return fmt.Errorf("failed to exec transaction: %w", err)
+		return fmt.Errorf("failed to exec: %w", err)
 	}
 
 	return nil
 }
 
-func (r *RedisRepo) UpdateByID(ctx context.Context, order model.Order) error {
+func (r *RedisRepo) Update(ctx context.Context, order model.Order) error {
 	data, err := json.Marshal(order)
 	if err != nil {
 		return fmt.Errorf("failed to marshal order: %w", err)
