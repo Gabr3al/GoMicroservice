@@ -14,19 +14,23 @@ type App struct {
 	rdb    *redis.Client
 }
 
-func New() *App {
+func New(redisAddress string) *App {
 	app := &App{
-		rdb: redis.NewClient(&redis.Options{}),
+		rdb: redis.NewClient(&redis.Options{
+			Addr: redisAddress,
+		}),
 	}
+	fmt.Print("\n")
+	fmt.Println("Redis connection established")
 
 	app.loadRoutes()
 
 	return app
 }
 
-func (a *App) Start(ctx context.Context) error {
+func (a *App) Start(ctx context.Context, port uint) error {
 	server := &http.Server{
-		Addr:    ":3000",
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: a.router,
 	}
 
@@ -41,7 +45,7 @@ func (a *App) Start(ctx context.Context) error {
 		}
 	}()
 
-	fmt.Println("Starting server")
+	fmt.Println("Listening on port", port)
 
 	ch := make(chan error, 1)
 
